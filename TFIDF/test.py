@@ -3,15 +3,10 @@ import csv
 
 from data_preparation_functions import split_proporcionaly
 
+from TFIDF.utils import open_data
+
 PATH_TO_DATA = "/Users/sebastiandonoso/Documents/NLP-GES/wlCorpus.csv"
-all_data = dict()
-with codecs.open(PATH_TO_DATA, 'r', 'utf8') as csvfile:
-    data = csv.DictReader(csvfile)
-    for row in data:
-        try:
-            all_data[row['PRESTA_EST']].append(row['SOSPECHA_DIAG'])
-        except:
-            all_data[row['PRESTA_EST']] = [row['SOSPECHA_DIAG']]
+all_data = open_data(PATH_TO_DATA)
 train_data, test_data = split_proporcionaly(0.75, 0.25, all_data)
 
 """
