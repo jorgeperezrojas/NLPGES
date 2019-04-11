@@ -15,13 +15,17 @@ def split_proporcionaly(train_percent, test_percent, data):
     test_data = dict()
 
     for key in data.keys():
-        train, test = train_test_split(data[key], test_size=test_percent, training_size=train_percent)
+        if len(data[key]) < 10:
+            continue
+
+        train, test = train_test_split(data[key], test_size=test_percent, train_size=train_percent)
         train_data[key] = train
         test_data[key] = test
     return train_data, test_data
 
+
 def open_data(path):
-    all_data= dict
+    all_data = dict()
     with codecs.open(path, 'r', 'utf8') as csvfile:
         data = csv.DictReader(csvfile)
         for row in data:
