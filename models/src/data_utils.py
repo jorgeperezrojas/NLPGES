@@ -259,7 +259,8 @@ class IntToOneHotVectorConverter():
 
     def to_one_hot_array(self, value):
         out = np.zeros(self._dim, dtype=np.int32)
-        out[index] = True
+        index = self.to_index(value)
+        out[index] = 1
         return out
 
     def to_one_hot_tensor(self, value):
@@ -267,7 +268,7 @@ class IntToOneHotVectorConverter():
         out = torch.from_numpy(v)
         return out
 
-    def list_to_one_hot_tensor(self, l, dtype=torch.float32):
+    def list_to_one_hot_tensor(self, l):
         out_list = []
         for val in t:
             v = self.to_one_hot_tensor(val)
@@ -275,7 +276,8 @@ class IntToOneHotVectorConverter():
         out = torch.stack(out_list)
         return(out)
 
-    def tensor_to_one_hot_tensor(self, t, dtype=torch.float32):
+    def tensor_to_one_hot_tensor(self, t):
+        # TODO: esto puede ser mucho más eficiente!
         input_list = [x.item() for x in t]
         out = self.list_to_one_hot_tensor(input_list)
         return out
