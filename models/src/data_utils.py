@@ -6,7 +6,6 @@ from collections import Counter
 from models.src.pre_processing_for_train import Tokenizer, hformat
 from copy import copy
 import sys
-from bisect import bisect_right
         
 
 def majority_vote(list_of_text_options, ignore_empty=True, if_draw='OUT'):
@@ -211,7 +210,7 @@ class TaggedDataset(Dataset):
         text, tag_text = self.data[idx]
         cl = self.target_mapping[tag_text]   
         tokens = self.tokenizer.tokenize_with_voc(text, self.vocabulary, unk=self.unk_symbol)
-        tensor_output = (self.tokens_to_tensor(tokens),cl)
+        tensor_output = (self.tokens_to_tensor(tokens), cl)
         return tensor_output
 
     def collate_data(self, data_list, binary=False):
@@ -228,56 +227,3 @@ class TaggedDataset(Dataset):
         else: #multiclass
             Y = torch.LongTensor(Y_seq)
         return ((X, lengths), Y)
-
-
-class IntToOneHotVectorConverter():
-    '''
-    Convierte un entero a un one-hot vector dependiendo de valores tresholds.
-    '''
-    def __init__(self, limits):
-        self._limits = sorted(limits)
-        self._dim = len(self._limits) + 1
-
-    def to_index(self, value):
-        index = bisect_right(self._limits, value)
-        return index
-
-    def list_to_index_array(self, l):
-        out_list = [self.to_index(x) for x in l]
-        out = np.array(out_list, dtype=np.int32)
-        return out
-
-    def list_to_index_tensor(self, l):
-        out_array = self.list_to_index_array(l)
-        out = torch.from_numpy(out_array)
-        return out
-
-    def tensor_to_index_tensor(self, t):
-        input_list = [x.item() for x in t]
-        out = self.list_to_index_tensor(input_list)
-        return out
-
-    def to_one_hot_array(self, value):
-        out = np.zeros(self._dim, dtype=np.int32)
-        index = self.to_index(value)
-        out[index] = 1
-        return out
-
-    def to_one_hot_tensor(self, value):
-        v = self.to_one_hot_array(value)
-        out = torch.from_numpy(v)
-        return out
-
-    def list_to_one_hot_tensor(self, l):
-        out_list = []
-        for val in t:
-            v = self.to_one_hot_tensor(val)
-            out_list.append(v)
-        out = torch.stack(out_list)
-        return(out)
-
-    def tensor_to_one_hot_tensor(self, t):
-        # TODO: esto puede ser mucho más eficiente!
-        input_list = [x.item() for x in t]
-        out = self.list_to_one_hot_tensor(input_list)
-        return out
