@@ -37,7 +37,7 @@ class NameFinder():
         male_name_file = 'models/util_data/nombres_hombres.txt', 
         female_name_file = 'models/util_data/nombres_mujeres.txt', 
         family_name_file = 'models/util_data/apellidos.txt',
-        replace_male='<NOMBRE>', replace_female='<NOMBRE>', replace_family='<APELIIDO>',
+        replace_male='<NOMBRE>', replace_female='<NOMBRE>', replace_family='<APELLIDO>',
         special_replace=[],
         ignore_names=[]
         ):
