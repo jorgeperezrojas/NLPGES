@@ -6,6 +6,7 @@ def getRange(row):
     return list(np.arange(row['min'], row['max']+1))
 data = pd.read_excel('data/ges-health-problems.xlsx')
 data['range'] = data.apply (lambda row: getRange(row), axis=1)
+data = data[['included_pathology','range']].groupby(by='included_pathology', as_index=False).sum()
 expanded = []
 for index, row in data.iterrows():
     for i in range(100):
