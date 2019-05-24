@@ -119,17 +119,17 @@ Bronquitis crónica con obstrucción de las vías aéreas,0,100
 Bronquitis crónica enfisematosa,0,100
 Bronquitis obstructiva crónica,0,100
 "Bronquitis, no especificada como aguda o crónica",0,5
-Cálculo (impactado) de la vesícula biliar no especificado o sin colecistitis,35,49
-"Cálculo (impactado) del conducto cístico, no especificado o sin colecistitis",35,49
-"Cálculo biliar (impactado) de conducto biliar sai, no especificado o sin colangitis o sin colecistitis",35,49
-"Cálculo biliar (impactado) del colédoco, no especificado o sin colangitis o sin colecistitis",35,49
-"Cálculo biliar (impactado) del conducto hepático, no especificado o sin colangitis o sin colecistitis",35,49
-Cálculo de conducto biliar con colangitis,35,49
-Cálculo de conducto biliar con colecistitis,35,49
-Cálculo de conducto biliar sin colangitis ni colecistitis,35,49
-Cálculo de la vesícula biliar con colecistitis aguda,35,49
-Cálculo de la vesícula biliar con otra colecistitis,35,49
-Cálculo de la vesícula biliar sin colecistitis,35,49
+Cálculo (impactado) de la vesícula biliar no especificado o sin colecistitis,35,50
+"Cálculo (impactado) del conducto cístico, no especificado o sin colecistitis",35,50
+"Cálculo biliar (impactado) de conducto biliar sai, no especificado o sin colangitis o sin colecistitis",35,50
+"Cálculo biliar (impactado) del colédoco, no especificado o sin colangitis o sin colecistitis",35,50
+"Cálculo biliar (impactado) del conducto hepático, no especificado o sin colangitis o sin colecistitis",35,50
+Cálculo de conducto biliar con colangitis,35,50
+Cálculo de conducto biliar con colecistitis,35,50
+Cálculo de conducto biliar sin colangitis ni colecistitis,35,50
+Cálculo de la vesícula biliar con colecistitis aguda,35,50
+Cálculo de la vesícula biliar con otra colecistitis,35,50
+Cálculo de la vesícula biliar sin colecistitis,35,50
 Cálculo dentario subgingival,60,61
 Cálculo dentario subgingival embarazada,0,100
 Cálculo dentario supragingival,60,61
@@ -201,13 +201,13 @@ Cloroma,15,100
 Coartación de la aorta,0,15
 Coartación de la aorta (preductal) (postductal),0,15
 Cocaína,0,20
-Colecistectomía preventiva del cáncer de vesícula en personas de 35 a 49 años,35,49
-Colecistolitiasis no especificada o sin colecistitis,35,49
-Colédocolitiasis no especificada o sin colangitis o sin colecistitis,35,49
-Colelitiasis hepática no especificada o sin colangitis o sin colecistitis,35,49
-Colelitiasis no especificada o sin colecistitis,35,49
-Cólico (recurrente) de vesícula biliar no especificado o sin colecistitis,35,49
-Cólico hepático (recurrente) no especificado o sin colangitis o sin colecistitis,35,49
+Colecistectomía preventiva del cáncer de vesícula en personas de 35 a 49 años,35,50
+Colecistolitiasis no especificada o sin colecistitis,35,50
+Colédocolitiasis no especificada o sin colangitis o sin colecistitis,35,50
+Colelitiasis hepática no especificada o sin colangitis o sin colecistitis,35,50
+Colelitiasis no especificada o sin colecistitis,35,50
+Cólico (recurrente) de vesícula biliar no especificado o sin colecistitis,35,50
+Cólico hepático (recurrente) no especificado o sin colangitis o sin colecistitis,35,50
 Colonización por Helicobacter Pylori,0,100
 Combinación de diagnósticos de Asma predominantemente alérgica y Asma no alérgica,15,100
 Combinación de diagnósticos de Asma predominantemente alérgica y Asma no alérgica,0,15
@@ -862,7 +862,7 @@ Pleuroneumonía (Todas las de manejo ambulatorio),65,100
 Poliartritis FR (-),0,100
 Poliartritis inflamatoria,0,100
 Poliartropatía inflamatoria,0,100
-Pólipos mayor o igual de 1 cm,35,49
+Pólipos mayor o igual de 1 cm,35,50
 Politraumatizado Grave,0,100
 Posición anómala del corazón,0,15
 Presbicia,65,100
