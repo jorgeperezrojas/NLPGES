@@ -40,3 +40,6 @@ tmtagsHistory
 *.sublime-workspace
 .bundle
 .txt
+
+#ignore_data
+data/
