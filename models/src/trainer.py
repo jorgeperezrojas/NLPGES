@@ -36,8 +36,8 @@ class MyTrainer():
         self.loss_fn = loss_fn
         self.device = device
 
-    def train(self, train_data, val_data, epochs, patience=5, 
-        padded_data=True, verbose=True, device=None, val_device=None, seed=333):
+    def train(self, train_data, val_data, epochs, patience=5, padded_data=True, 
+        prepare_batch_fn=None, verbose=True, device=None, val_device=None, seed=333):
 
         if device == None:
             device = self.device
@@ -49,8 +49,8 @@ class MyTrainer():
         self.model = self.model.to(device)
         max_dev_acc, max_epoch = MySearchTrainer.train_specific_model(
                 self.model, self.optimizer, self.loss_fn, train_data, val_data, epochs,
-                device, val_device, padded_data, verbose=verbose, patience=patience,
-                output_file_details=None)
+                device, val_device, padded_data, prepare_batch_fn=prepare_batch_fn, 
+                verbose=verbose, patience=patience, output_file_details=None)
 
         print_info = f'max dev_acc:{100*max_dev_acc:02.2f} at epoch:{max_epoch}\n'
         print(print_info)
@@ -60,7 +60,7 @@ class MySearchTrainer():
     # TODO: sacar las funcionalidades de train_specific_model y eval
     def __init__(self, 
                  model_class, optimizer_class, loss_fn,
-                 train_data, val_data, padded_data=True,
+                 train_data, val_data, padded_data=True, prepare_batch_fn=None,
                  model_params={}, optimizer_params={},
                  hps_prefix='__hps__',
                  epochs=2,
@@ -80,6 +80,7 @@ class MySearchTrainer():
         self.train_data = train_data
         self.val_data = val_data
         self.padded_data = padded_data
+        self.prepare_batch_fn = prepare_batch_fn
         
         self.epochs = epochs
         self.device = device
@@ -120,7 +121,7 @@ class MySearchTrainer():
 
             max_dev_acc, max_epoch = self.train_specific_model(
                 model, optimizer, self.loss_fn, self.train_data, self.val_data, self.epochs,
-                self.device, self.device, self.padded_data, verbose=True, patience=self.patience,
+                self.device, self.device, self.padded_data, prepare_batch_fn=self.prepare_batch_fn, verbose=True, patience=self.patience,
                 output_file_details=self.output_filenames['details']
             )
 
@@ -145,11 +146,12 @@ class MySearchTrainer():
             self.m_ps = m_ps
 
 
-    def eval(self, data, padded_data, device):
-        return MySearchTrainer.eval_specific_model(self.best_model, self.loss_fn, data, padded_data, device)
+    def eval(self, data, padded_data, device, prepare_batch_fn=None):
+        return MySearchTrainer.eval_specific_model(self.best_model, self.loss_fn, data, padded_data, 
+            device, prepare_batch_fn=prepare_batch_fn)
 
 
-    def predict(self, X, padded_data, device):
+    def predict(self, X, padded_data, device, prepare_batch_fn=None):
         model = self.best_model
         model.eval()
         if padded_data:
@@ -174,14 +176,17 @@ class MySearchTrainer():
         return Y_class, Y_prob   
     
     @staticmethod
-    def eval_specific_model(model, loss_fn, data, padded_data, device):
+    def eval_specific_model(model, loss_fn, data, padded_data, device, prepare_batch_fn=None):
         model = model.to(device)
         model.eval()
         running_loss = 0.0
         running_acc = 0.0
         total_examples = 0
         for batch in data:
-            (X, Y) = MySearchTrainer._prepare_data_from_batch(batch, padded_data, device)
+            if prepare_batch_fn == None:
+                (X, Y) = MySearchTrainer._prepare_data_from_batch(batch, padded_data, device)
+            else:
+                (X, Y) = prepare_batch_fn(batch, device)
             Y_pred = model(X)
             Y_class, Y_prob = MySearchTrainer.logit_to_class(Y_pred)
             running_loss += loss_fn(Y_pred, Y).item()
@@ -194,7 +199,8 @@ class MySearchTrainer():
     @staticmethod
     def train_specific_model(
             model, optimizer, loss_fn, train_data, dev_data, epochs,  
-            device, eval_device, padded_data, verbose, patience, output_file_details=None):
+            device, eval_device, padded_data, prepare_batch_fn=None, 
+            verbose=False, patience=1, output_file_details=None):
         # assume that (all) model parameters and optimizer are in the same device 
         # as the one passed as argument
         acc_not_improving = 0
@@ -208,7 +214,10 @@ class MySearchTrainer():
             for i, batch in enumerate(train_data):
                 model.train()
                 optimizer.zero_grad()
-                (X, Y) = MySearchTrainer._prepare_data_from_batch(batch, padded_data, device)
+                if prepare_batch_fn == None:
+                    (X, Y) = MySearchTrainer._prepare_data_from_batch(batch, padded_data, device)
+                else:
+                    (X, Y) = prepare_batch_fn(batch, device)
                 Y_pred = model(X)
                 loss = loss_fn(Y_pred, Y)
                 loss.backward()
@@ -225,7 +234,7 @@ class MySearchTrainer():
             elapsed_time = (time.time() - epoch_init_time)
             train_loss = running_loss/total_examples
             train_acc = running_acc/total_examples
-            dev_loss, dev_acc = MySearchTrainer.eval_specific_model(model, loss_fn, dev_data, padded_data, eval_device)
+            dev_loss, dev_acc = MySearchTrainer.eval_specific_model(model, loss_fn, dev_data, padded_data, eval_device, prepare_batch_fn=prepare_batch_fn)
             out_info_iter = \
                 f'\rEpoch:{epoch+1:03} in {elapsed_time:03.0f}s ' +\
                 f'train_loss:{train_loss:02.5f}, train_acc:{100*train_acc:02.2f}% ' +\
