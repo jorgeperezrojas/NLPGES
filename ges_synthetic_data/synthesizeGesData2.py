@@ -4,7 +4,7 @@ import re
 from collections import defaultdict
 
 random.seed(333)
-EJEMPLOS_POR_PATOLOGIA = 160
+EJEMPLOS_POR_PATOLOGIA = 60
 
 # Funcion ultra simple para normalizar (un poco el texto)
 # se puede mejorar con un tokenizador o algo así.
@@ -47,7 +47,17 @@ with open('super-ges.csv', 'w') as outfile:
         ges_ages = set.union(*[set(rango) for rango in rangos])
         ges_ages = list(ges_ages)
         not_ges_ages = [x for x in possible_ages if x not in ges_ages]
-        
+
+        # Primero crea un ejemplo por cada edad:
+        for i in range(0,100):
+            row['EDAD'] = i
+            if i in ges_ages:
+                row['GES'] = 'True'
+            else:
+                row['GES'] = 'False'
+            writer.writerow(row)
+
+        # Ahora crea ejemplos adicionales al azar
         for i in range(EJEMPLOS_POR_PATOLOGIA):
             # Si not_ges_ages es vacío entonces la patología es siempre GES.
             # De otra forma, decide con 50% cuando hacer un ejemplo positivo y negativo para la clase GES
