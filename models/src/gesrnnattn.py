@@ -79,8 +79,11 @@ class GESAttnModel(RNNAttnModel):
         # use context vector to compute the attention
         H = self.attention(C, O)
 
-        # use the attention plus X_edad to produce the final output
+        # compute an embedding for X_edad
         E = self.edad_emb_layer(X_edad)
+        E = torch.nn.functional.relu(E)
+
+        # use the attention plus X_edad to produce the final output
         H = torch.cat((H, E), 1)
         H = self.fc_1_dropout(H)
         H = self.fc_1(H)
