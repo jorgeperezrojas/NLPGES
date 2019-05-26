@@ -3,8 +3,10 @@ import csv
 import re
 from collections import defaultdict
 
+EJEMPLOS_PARA_TODAS_LAS_EDADES = True
+EJEMPLOS_AL_AZAR_POR_PATOLOGIA = 60
+
 random.seed(333)
-EJEMPLOS_POR_PATOLOGIA = 60
 
 # Funcion ultra simple para normalizar (un poco el texto)
 # se puede mejorar con un tokenizador o algo así.
@@ -48,19 +50,20 @@ with open('super-ges.csv', 'w') as outfile:
         ges_ages = list(ges_ages)
         not_ges_ages = [x for x in possible_ages if x not in ges_ages]
 
-        # Primero crea un ejemplo por cada edad:
-        for i in range(0,100):
-            row['EDAD'] = i
-            if i in ges_ages:
-                row['GES'] = 'True'
-            else:
-                row['GES'] = 'False'
-            writer.writerow(row)
+        # Crea un ejemplo por cada edad:
+        if EJEMPLOS_PARA_TODAS_LAS_EDADES:
+            for i in range(0,100):
+                row['EDAD'] = i
+                if i in ges_ages:
+                    row['GES'] = 'True'
+                else:
+                    row['GES'] = 'False'
+                writer.writerow(row)
 
-        # Ahora crea ejemplos adicionales al azar
-        for i in range(EJEMPLOS_POR_PATOLOGIA):
+        # Crea ejemplos adicionales al azar
+        for i in range(EJEMPLOS_AL_AZAR_POR_PATOLOGIA):
             # Si not_ges_ages es vacío entonces la patología es siempre GES.
-            # De otra forma, decide con 50% cuando hacer un ejemplo positivo y negativo para la clase GES
+            # De otra forma, decide con 50% prob cuando hacer un ejemplo positivo para clase GES
             if (not_ges_ages == []) or (random.uniform(0,1) > 0.5):
                 row['GES'] = 'True'
                 row['EDAD'] = random.choice(ges_ages)
