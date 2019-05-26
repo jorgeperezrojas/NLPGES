@@ -130,9 +130,10 @@ class GESOrderedAttnModel(GESAttnModel):
         ## delete the embedding layer for X_edad
         del(self.edad_emb_layer)
 
-        ## add new parameter for ordered edad embeddings
-        self.left_edad_embedding = torch.nn.Linear(edad_limits_size,edad_embedding_size)
-        self.right_edad_embedding = torch.nn.Linear(edad_limits_size,edad_embedding_size)
+        ## add new parameters for ordered edad embeddings
+        self.left_edad_embedding = torch.nn.Linear(edad_limits_size,edad_embedding_size, bias=False)
+        self.right_edad_embedding = torch.nn.Linear(edad_limits_size,edad_embedding_size, bias=False)
+        self.edad_emb_layer = torch.nn.Linear(2*edad_embedding_size,edad_embedding_size, bias=False)
 
         ## for later use
         self.edad_limits_size = edad_limits_size
@@ -150,7 +151,12 @@ class GESOrderedAttnModel(GESAttnModel):
         R = P.cumsum(1)
         L = P.new_ones(self.edad_limits_size) - R + P
 
-        # compute an embedding for X_edad
-        # the following + op can be changed for a different on like concat
-        E = self.left_edad_embedding(L) + self.right_edad_embedding(R)
+        # compute left and right embeddings for X_edad
+        L = self.left_edad_embedding(L)
+        R = self.right_edad_embedding(R)
+        
+        # compute the final embedding
+        E = torch.cat((L,R), 1)
+        E = self.edad_emb_layer(E)
+        E = torch.nn.functional.relu(E)
         return E
