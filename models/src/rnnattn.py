@@ -66,7 +66,7 @@ class RNNAttnModel(torch.nn.Module):
         else:
             pass
         
-    def attention(self, context_vector, input_vectors):
+    def _attention(self, context_vector, input_vectors):
         # TODO: optimize Q computation when no batch is provided in the context vector
         # TODO: try to change the einsum computations by tensordot or bmm when possible
         if len(context_vector.size()) == 1: 
@@ -98,7 +98,7 @@ class RNNAttnModel(torch.nn.Module):
         else:
             O, _ = torch.nn.utils.rnn.pad_packed_sequence(O)
             q = self.query
-            H = self.attention(q, O)
+            H = self._attention(q, O)
         H = self.fc_1_dropout(H)
         H = self.fc_1(H)
         H = torch.nn.functional.relu(H)

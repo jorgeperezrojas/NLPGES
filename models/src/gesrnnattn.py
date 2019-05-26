@@ -1,5 +1,6 @@
 import torch
 from models.src.rnnattn import RNNAttnModel
+import ipdb
 
 class GESAttnModel(RNNAttnModel):
     def __init__(self,
@@ -50,17 +51,8 @@ class GESAttnModel(RNNAttnModel):
         # TODO: reset self.especialidad_emb_layer, self.edad_emb_layer, self.context_layer, self.fc_1
         pass
         
-
-    def forward(self, X):
-        # assume input is of the form X = (X_text, X_especialidad, X_edad, lengths)
-        # - X_text is a tensor obtained from a padded sequence of text (in the form of word sequences), 
-        # with time-step first (time,batch,features)
-        # - X_especialidad is the index of an embedding for especialidad
-        # - X_edad is the index of an embedding for edad
-        # - lengths is a tensor containing the lengths of every sequence in X_text
-
-        X_text, X_especialidad, X_edad, lengths = X
-        batch_size = len(lengths)
+    def _rnn(self, X):
+        X_text, _, _, lengths = X
 
         # embeddings + rnn for X_text
         H = self.emb_layer(X_text)
@@ -68,6 +60,12 @@ class GESAttnModel(RNNAttnModel):
         H = torch.nn.utils.rnn.pack_padded_sequence(H, lengths)
         O, (_, _) = self.lstm(H)
         O, _ = torch.nn.utils.rnn.pad_packed_sequence(O)
+        return O
+
+    def _context(self, X, O):
+        # for now we just ignore O
+        _, X_especialidad, _, lengths = X
+        batch_size = len(lengths)
 
         # compute context vectors for attention from self.query and X_especialidad
         E = self.especialidad_emb_layer(X_especialidad)
@@ -75,20 +73,84 @@ class GESAttnModel(RNNAttnModel):
         C = torch.cat((C, E), 1)
         C = self.context_layer(C)
         C = torch.nn.functional.relu(C)
+        return C
 
-        # use context vector to compute the attention
-        H = self.attention(C, O)
+    def _edad_embedding(self, X):
+        _, _, X_edad, _ = X
 
         # compute an embedding for X_edad
         E = self.edad_emb_layer(X_edad)
         E = torch.nn.functional.relu(E)
+        return E
 
-        # use the attention plus X_edad to produce the final output
-        H = torch.cat((H, E), 1)
+    def _output(self, A, E):
+        H = torch.cat((A, E), 1)
         H = self.fc_1_dropout(H)
         H = self.fc_1(H)
         H = torch.nn.functional.relu(H)
         H = self.fc_2_dropout(H)
         H = self.fc_2(H)
+        return H        
+
+    def forward(self, X):
+        # Assumes input is of the form X = (X_text, X_especialidad, X_edad, lengths)
+        # - X_text is a tensor obtained from a padded sequence of text (in the form of word sequences), 
+        # with time-step first (time,batch,features)
+        # - X_especialidad is the index of an embedding for especialidad
+        # - X_edad is the index of an embedding for edad
+        # - lengths is a tensor containing the lengths of every sequence in X_text
+
+        # rnn
+        O = self._rnn(X)
+        # context
+        C = self._context(X, O)
+        # use context vector to compute the attention
+        A = self._attention(C, O)
+        # compute an embedding for the edad input
+        E = self._edad_embedding(X)
+        # use the attention plus the edad embedding to produce the final output
+        H = self._output(A, E)
         return H 
         
+class GESOrderedAttnModel(GESAttnModel):
+    def __init__(self,
+        vocab_size,
+        especialidad_voc_size,
+        edad_limits_size,
+        **kwargs):
+
+        super(GESOrderedAttnModel, self).__init__(
+                    vocab_size,
+                    especialidad_voc_size,
+                    edad_limits_size,
+                    **kwargs)
+
+        ## get the edad embedding size
+        edad_embedding_size = self.edad_emb_layer.embedding_dim
+        ## delete the embedding layer for X_edad
+        del(self.edad_emb_layer)
+
+        ## add new parameter for ordered edad embeddings
+        self.left_edad_embedding = torch.nn.Linear(edad_limits_size,edad_embedding_size)
+        self.right_edad_embedding = torch.nn.Linear(edad_limits_size,edad_embedding_size)
+
+        ## for later use
+        self.edad_limits_size = edad_limits_size
+
+
+    def _edad_embedding(self, X):
+        # ipdb.set_trace()
+        _, _, X_edad, _ = X
+
+        # ordered layer for X_edad
+        # create the identity
+        I = torch.eye(self.edad_limits_size)
+        I = I.to(X_edad.device)
+        P = I[X_edad]
+        R = P.cumsum(1)
+        L = P.new_ones(self.edad_limits_size) - R + P
+
+        # compute an embedding for X_edad
+        # the following + op can be changed for a different on like concat
+        E = self.left_edad_embedding(L) + self.right_edad_embedding(R)
+        return E
