@@ -227,7 +227,7 @@ class MySearchTrainer():
                 running_acc += torch.sum(Y == Y_class).item()
                 total_examples += len(Y)
                 partial_info = f'\rEpoch:{epoch+1:03} batch:{i+1}/{len(train_data)} ' +\
-                    f'running_loss:{running_loss/total_examples:02.5f} ' +\
+                    f'running_loss:{running_loss/total_examples:02.6f} ' +\
                     f'running_acc:{100*running_acc/total_examples:02.2f}%    '
                 sys.stdout.write(partial_info)
             
@@ -237,8 +237,8 @@ class MySearchTrainer():
             dev_loss, dev_acc = MySearchTrainer.eval_specific_model(model, loss_fn, dev_data, padded_data, eval_device, prepare_batch_fn=prepare_batch_fn)
             out_info_iter = \
                 f'\rEpoch:{epoch+1:03} in {elapsed_time:03.0f}s ' +\
-                f'train_loss:{train_loss:02.5f}, train_acc:{100*train_acc:02.2f}% ' +\
-                f'dev_loss:{dev_loss:02.5f}, dev_acc:{100*dev_acc:02.2f}%'
+                f'train_loss:{train_loss:02.6f}, train_acc:{100*train_acc:02.2f}% ' +\
+                f'dev_loss:{dev_loss:02.6f}, dev_acc:{100*dev_acc:02.2f}%'
             print(out_info_iter)
 
             if output_file_details != None:
