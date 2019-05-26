@@ -9,7 +9,7 @@ class GESAttnModel(RNNAttnModel):
         edad_limits_size,
         embedding_size = 50,
         especialidad_embedding_size = 20,
-        edad_embedding_size = 20,
+        edad_embedding_size = 40,
         input_dropout = 0,
         num_rnn_layers = 1,
         rnn_hidden_size = 50,
@@ -133,7 +133,7 @@ class GESOrderedAttnModel(GESAttnModel):
         ## add new parameters for ordered edad embeddings
         self.left_edad_embedding = torch.nn.Linear(edad_limits_size,edad_embedding_size, bias=False)
         self.right_edad_embedding = torch.nn.Linear(edad_limits_size,edad_embedding_size, bias=False)
-        self.edad_emb_layer = torch.nn.Linear(2*edad_embedding_size,edad_embedding_size, bias=False)
+        self.edad_emb_layer = torch.nn.Linear(3*edad_embedding_size,edad_embedding_size, bias=False)
 
         ## for later use
         self.edad_limits_size = edad_limits_size
@@ -147,16 +147,19 @@ class GESOrderedAttnModel(GESAttnModel):
         # create the identity
         I = torch.eye(self.edad_limits_size)
         I = I.to(X_edad.device)
-        P = I[X_edad]
-        R = P.cumsum(1)
-        L = P.new_ones(self.edad_limits_size) - R + P
+        C = I[X_edad]
+        R = C.cumsum(1)
+        L = C.new_ones(self.edad_limits_size) - R + C
+
+        # compute the center embedding for X_edad
+        C = self.left_edad_embedding(C) + self.right_edad_embedding(C)
 
         # compute left and right embeddings for X_edad
         L = self.left_edad_embedding(L)
         R = self.right_edad_embedding(R)
         
         # compute the final embedding
-        E = torch.cat((L,R), 1)
+        E = torch.cat((L,C,R), 1)
         E = self.edad_emb_layer(E)
         E = torch.nn.functional.relu(E)
         return E
