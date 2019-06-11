@@ -43,3 +43,5 @@ tmtagsHistory
 
 #ignore_data
 data/
+*.ipynb
+venv/
