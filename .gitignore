@@ -45,3 +45,5 @@ tmtagsHistory
 data/
 *.ipynb
 venv/
+test/
+.csv

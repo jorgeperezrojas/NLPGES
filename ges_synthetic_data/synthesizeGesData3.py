@@ -33,19 +33,20 @@ class SynthesizeData:
             if not self.fields:
                 self.pathologies_data[key]['field'] = 'None'
             self.pathologies_data[key]['original_text'] = original_text
-            left = int(categorie['all_range'][0])
-            max = categorie['all_range'][1]
+            left = int(categorie['all_ranges'][0])
+            max = categorie['all_ranges'][1]
             right = 100 if max == 'inf' else int(max)
             self.pathologies_ranges[key] = range(left, right)
 
-    def create_synthesize_data(self, out_path, example_for_each_age=True, random_by_pathology=60, random_data=True):
+    def create_synthesize_data(self, out_path, example_for_each_age=True, random_by_pathology=60):
+        self.open_data()
         random.seed(333)
         with open(out_path, 'w') as outfile:
             writer = csv.DictWriter(outfile, ['SOSPECHA_DIAGNOSTICA', 'ESPECIALIDAD', 'EDAD', 'GES'])
             writer.writeheader()
             for key in self.pathologies_data:
                 row = dict()
-                row['SOSPECHA_DIAGNOSITCA'] = self.pathologies_data[key]['original_text']
+                row['SOSPECHA_DIAGNOSTICA'] = self.pathologies_data[key]['original_text']
                 row['ESPECIALIDAD'] = self.pathologies_data[key]['field']
                 possible_ages = range(0, 100)
                 ges_ages = self.pathologies_ranges[key]
@@ -56,12 +57,11 @@ class SynthesizeData:
                         row['GES'] = 'True' if i in ges_ages else 'False'
                         writer.writerow(row)
 
-                if random_data:
-                    for i in range(random_by_pathology):
-                        if (not_ges_ages == []) or (random.uniform(0, 1) > 0.5):
-                            row['GES'] = 'True'
-                            row['EDAD'] = random.choice(ges_ages)
-                        else:
-                            row['GES'] = 'False'
-                            row['EDAD'] = random.choice(not_ges_ages)
-                        writer.writerow(row)
+                for i in range(random_by_pathology):
+                    if (not_ges_ages == []) or (random.uniform(0, 1) > 0.5):
+                        row['GES'] = 'True'
+                        row['EDAD'] = random.choice(ges_ages)
+                    else:
+                        row['GES'] = 'False'
+                        row['EDAD'] = random.choice(not_ges_ages)
+                    writer.writerow(row)
